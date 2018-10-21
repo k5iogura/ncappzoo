@@ -19,7 +19,7 @@ PATCHED_PROTOTXT_FILENAME= patched_${PROTOTXT_FILENAME}
 # The name of the patch to apply to the downloaded prototxt file
 PATCH_FOR_PROTOTXT_FILENAME = deploy_prototxt_update.patch
 
-GET_PROTOTXT = wget -P . -O ${PROTOTXT_FILENAME} https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/${PROTOTXT_FILENAME}
+GET_PROTOTXT = wget -P . -O ${PROTOTXT_FILENAME} https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/voc/${PROTOTXT_FILENAME}
 
 CAFFEMODEL_FILENAME = MobileNetSSD_deploy.caffemodel
 
