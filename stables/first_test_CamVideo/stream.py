@@ -38,7 +38,7 @@ class FStream:
 
 
 #fsv = FStream("LA_VGA.mp4").start()
-fsv = FStream("1mb2.mp4").start()
+fsv = FStream("NHK1.mp4").start()
 time.sleep(1.0)
 
 while fsv.more():
