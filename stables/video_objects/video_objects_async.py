@@ -339,6 +339,7 @@ def main():
     # get list of all the .mp4 files in the image directory
     input_video_filename_list = os.listdir(input_video_path)
     input_video_filename_list = [i for i in input_video_filename_list if i.endswith('.mp4')]
+    print(input_video_filename_list)
 
     if (len(input_video_filename_list) < 1):
         # no images to show
@@ -352,7 +353,12 @@ def main():
     buffsize = 3
     display_image=[None for i in range(0,buffsize)]
     while (True):
-        for input_video_file in input_video_filename_list :
+        for ( video_no, input_video_file ) in enumerate(input_video_filename_list) :
+
+            print("exiting on %d/%d"%(video_no,len(input_video_filename_list)))
+            if video_no == len(input_video_filename_list)-2:
+                print("for exit")
+                exit_app = True
 
             cap = cv2.VideoCapture(input_video_file)
         #    for i in range(0,buffsize):
@@ -420,8 +426,7 @@ def main():
             break
 
     # Clean up the graph and the device
-    ssd_mobilenet_graph.DeallocateGraph()
-    device.CloseDevice()
+    Detector.close()
 
 
     cv2.destroyAllWindows()
