@@ -355,8 +355,8 @@ def main():
         for input_video_file in input_video_filename_list :
 
             cap = cv2.VideoCapture(input_video_file)
-            for i in range(0,buffsize):
-                ret, display_image[i] = cap.read()
+        #    for i in range(0,buffsize):
+        #        ret, display_image[i] = cap.read()
 
             actual_frame_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
             actual_frame_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
