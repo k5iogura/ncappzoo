@@ -375,14 +375,18 @@ def main():
             start_time = time.time()
             end_time = start_time
 
+            ToNext = False
             while(True):
+
                 for i in range(0,buffsize):
                     ret, display_image[i] = cap.read()
-                    if i == 0: Detector.initiate(display_image[i])
                     if (not ret):
                         end_time = time.time()
                         print("No image from from video device, exiting")
+                        ToNext = True
                         break
+                    if i == 0: Detector.initiate(display_image[i])
+                if ToNext:break
 
                 # check if the window is visible, this means the user hasn't closed
                 # the window via the X button
