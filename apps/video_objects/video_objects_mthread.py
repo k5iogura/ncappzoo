@@ -11,6 +11,7 @@ import cv2
 import time
 import csv
 import os
+import argparse
 import sys
 from sys import argv
 import video_processor
@@ -234,7 +235,7 @@ class detector:
     def getResult(self):
         # Get the result from the NCS
         output, userobj = self.ssd_mobilenet_graph.GetResult()
-
+        #  output
         #   a.	First fp16 value holds the number of valid detections = num_valid.
         #   b.	The next 6 values are unused.
         #   c.	The next (7 * num_valid) values contain the valid detections data
@@ -309,9 +310,9 @@ def draw_img(display_image):
 def main():
     global resize_output, resize_output_width, resize_output_height
 
-    if (not handle_args()):
-        print_usage()
-        return 1
+#    if (not handle_args()):
+#        print_usage()
+#        return 1
 
     Detector = detector()
 
@@ -398,4 +399,16 @@ def main():
 
 # main entry point for program. we'll call main() to do what needs to be done.
 if __name__ == "__main__":
+
+    args = argparse.ArgumentParser()
+    args.add_argument("--resize",       action="store_true",     help="resize video window")
+    args.add_argument("-w", "--width" , type=int, default=640,   help="video width")
+    args.add_argument("-t", "--height", type=int, default=480,   help="video height")
+    args.add_argument("-c", "--cam",    type=int, default=0,     help="camera index")
+    args = args.parse_args()
+    if args.resize: resize_output=True
+    resize_output_width = args.width
+    resize_output_height= args.height
+
     sys.exit(main())
+
