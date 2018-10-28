@@ -369,8 +369,6 @@ def main():
                 exit_app = True
                 break
 
-            #Detector.run_inference(display_image[0])
-
             for i in range(0, buffsize):
                 if i >= 0: Detector.finish(display_image[i])
                 raw_key = draw_img(display_image[i])

@@ -10,25 +10,17 @@ NCCHECK   = mvNCCheck
 # filenames for the graph files that we'll copy to this directory.
 SSD_MOBILENET_GRAPH_FILENAME = graph
 
-GET_VIDEOS = wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/licenses.txt; \
-             wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/bus_station_6094_960x540.mp4; \
-             wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/motorcycle_6098_shortened_960x540.mp4; \
-             wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/contrapicado_traffic_shortened_960x540.mp4; \
-             wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/police_car_6095_shortened_960x540.mp4; \
-             wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/scooters_5638_shortened_960x540.mp4
-
 .PHONY: all
 all: prereqs videos ssd_mobilenet
 
 .PHONY: ssd_mobilenet
-ssd_mobilenet: 
+ssd_mobilenet:
 	@echo "\nmaking ssd_mobilenet"
-	(cd ../../caffe/SSD_MobileNet; make compile; cd ../../apps/video_objects; cp ../../caffe/SSD_MobileNet/graph ./${SSD_MOBILENET_GRAPH_FILENAME};) 
+	(cd ../../caffe/SSD_MobileNet; make compile; cd ../../apps/video_objects; cp ../../caffe/SSD_MobileNet/graph ./${SSD_MobileNet};) 
 
 .PHONY: videos
-videos:
+videos: licenses.txt bus_station_6094_960x540.mp4 motorcycle_6098_shortened_960x540.mp4 contrapicado_traffic_shortened_960x540.mp4 police_car_6095_shortened_960x540.mp4 scooters_5638_shortened_960x540.mp4
 	@echo "\nmaking videos"
-	${GET_VIDEOS};
 
 .PHONY: prereqs
 prereqs:
@@ -36,10 +28,24 @@ prereqs:
 	@sed -i 's/\r//' *.py
 	@chmod +x *.py
 
+licenses.txt:
+	wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/$@
+
+bus_station_6094_960x540.mp4:
+	wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/bus_station_6094_960x540.mp4
+motorcycle_6098_shortened_960x540.mp4:
+	wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/motorcycle_6098_shortened_960x540.mp4
+contrapicado_traffic_shortened_960x540.mp4:
+	wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/contrapicado_traffic_shortened_960x540.mp4
+police_car_6095_shortened_960x540.mp4:
+	wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/police_car_6095_shortened_960x540.mp4
+scooters_5638_shortened_960x540.mp4:
+	wget -c --no-cache -P . https://raw.githubusercontent.com/nealvis/media/master/traffic_vid/scooters_5638_shortened_960x540.mp4
+
 .PHONY: run_py
 run_py: prereqs ssd_mobilenet videos
 	@echo "\nmaking run_py"
-	python3 ./video_objects.py
+	python3 ./video_objects_mthread.py
 
 
 .PHONY: run
