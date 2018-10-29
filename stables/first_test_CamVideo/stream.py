@@ -67,7 +67,7 @@ class DStream:
         self.stopped=True
 
 
-fsv = FStream("1mb2.mp4").start()
+fsv = FStream("NHK1.mp4").start()
 dsv = DStream("video").start()
 time.sleep(1.0)
 
