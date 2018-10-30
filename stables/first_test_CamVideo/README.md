@@ -17,8 +17,8 @@ python3 -c "import OpenGL"
 python3 -c "import OpenGLU"
 python3 -c "import OpenGLUT"
 ```
-### Code Example ###
-- Renderring video stream from .mp4 movie file.  
+### Code Example video_detector.py ###
+- Rendering video stream from police_car_6095_shortened_960x540.mp4 movie file.  
 - 3 threads are used, first is main thread, second is Video file Interface, last is prediction by NCS thread.
 - queue and stackmax class are used to interface 2 thread.  
 queue class is generally from pythone3, so supporting put() and get().  
