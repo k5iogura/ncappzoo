@@ -353,7 +353,27 @@ def main():
         Detector.initiate(Q.get())
         while(True):
 
-            for i in range(0,buffsize):
+#            for i in range(0,buffsize):
+#                if not vp.finished() or Q.qsize() > 0:
+#                    display_image[i] = Q.get()
+#                else:
+#                    vp.cleanup()
+#                    end_time = time.time()
+#                    ToNext = True
+#                    break
+            #    if i == 0: Detector.initiate(display_image[i])
+#            if ToNext:break
+
+            # check if the window is visible, this means the user hasn't closed
+            # the window via the X button
+#            prop_val = cv2.getWindowProperty(cv_window_name, cv2.WND_PROP_ASPECT_RATIO)
+#            if (prop_val < 0.0):
+#                print("X button")
+#                end_time = time.time()
+#                exit_app = True
+#                break
+
+            for i in range(0, buffsize):
                 if not vp.finished() or Q.qsize() > 0:
                     display_image[i] = Q.get()
                 else:
@@ -361,18 +381,6 @@ def main():
                     end_time = time.time()
                     ToNext = True
                     break
-            #    if i == 0: Detector.initiate(display_image[i])
-            if ToNext:break
-
-            # check if the window is visible, this means the user hasn't closed
-            # the window via the X button
-            prop_val = cv2.getWindowProperty(cv_window_name, cv2.WND_PROP_ASPECT_RATIO)
-            if (prop_val < 0.0):
-                end_time = time.time()
-                exit_app = True
-                break
-
-            for i in range(0, buffsize):
                 if i >= 0: image_overlapped = Detector.finish(display_image[i])
                 if i == 0: Detector.initiate(display_image[i])
                 raw_key = draw_img(image_overlapped)
@@ -382,6 +390,7 @@ def main():
                         exit_app = True
                         break
                 frame_count += 1
+            if ToNext:break
 
         frames_per_second = frame_count / (end_time - start_time)
         print('Frames per Second: ' + str(frames_per_second))
