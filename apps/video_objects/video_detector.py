@@ -52,6 +52,11 @@ resize_output = False
 resize_output_width = 0
 resize_output_height = 0
 
+#for_close_device = None
+#for_close_graph  = None
+movidius_thread  = None
+system_stop = False
+
 # create a preprocessed image from the source image that complies to the
 # network expectations and return it
 def preprocess_image(source_image):
@@ -76,6 +81,7 @@ def run_inference(image_source, ssd_mobilenet_graph, result_queue):
     return output
 
 def init_movidius():
+    global for_close_graph, for_close_device
     mvnc.SetGlobalOption(mvnc.GlobalOption.LOG_LEVEL, 2)
     devices = mvnc.EnumerateDevices()
     if len(devices) == 0:
@@ -86,13 +92,12 @@ def init_movidius():
     graph_filename = 'graph'
     with open(graph_filename, mode='rb') as f:
         graph_data = f.read()
-    for_close_grapth = device.AllocateGraph(graph_data)
-    return for_close_grapth
+    for_close_graph = device.AllocateGraph(graph_data)
+    return for_close_graph
     #return device.AllocateGraph(graph_data)
 
-for_close_device = None
-for_close_graph  = None
 def close_movidius():
+    global for_close_graph, for_close_device
     # Clean up the graph and the device
     for_close_graph.DeallocateGraph()
     for_close_device.CloseDevice()
@@ -177,7 +182,8 @@ cap.set(cv2.CAP_PROP_FPS, 30)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-widowWidth = 720
+#widowWidth = 720
+widowWidth = 1028
 windowHeight = 480
 
 # Alternative detector
@@ -193,10 +199,15 @@ def run_through(image_source, ssd_mobilenet_graph, image_stack, result_queue):
             output = run_inference(Image_source, ssd_mobilenet_graph, result_queue)
             result_queue.put(output)
             print("%.6f FPS %d objects"%((1.0/(time.time()-start)), output[0]))
+        if system_stop:
+            print("stopping run_through..")
+            break
 
 # For OpenGL
 def draw_image():
     ret, img = cap.read()
+    if not ret:
+        return
 
     # for Movidius
     global mostrcnt
@@ -241,6 +252,11 @@ def reshape(w, h):
 def keyboard(key, x, y):
     key = key.decode('utf-8')
     if key == 'q':
+        system_stop = True
+        threadlist = threading.enumerate()
+        threadlist.remove(threading.main_thread())
+        for th in threadlist:
+            th.join()
         close_movidius()
         print('exit')
         sys.exit()
@@ -277,8 +293,14 @@ if __name__ == "__main__":
     mostrcnt = None
 
     # For Movidius
+    system_stop = False
     ssd_mobilenet_graph = init_movidius()
-    threading.Thread(target=run_through, args = (None, ssd_mobilenet_graph, imgstack, resqueue)).start()
+    movidius_thread     = threading.Thread(
+        target=run_through,
+        args = (None, ssd_mobilenet_graph,
+        imgstack,
+        resqueue)
+    ).start()
 
     glutMainLoop()
 
