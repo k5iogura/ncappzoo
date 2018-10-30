@@ -221,16 +221,17 @@ class detector:
         # Send the image to the NCS as 16 bit floats
         self.ssd_mobilenet_graph.LoadTensor(resized_image.astype(numpy.float16), None)
 
-    def finish(self, image_to_classify):
+    def finish(self, image_source):
+        copy_image = image_source.copy()
         if self.initiated:
             output, userobj = self.ssd_mobilenet_graph.GetResult()
-            self.overlay(image_to_classify, output)
+            self.overlay(copy_image, output)
             self.output = output
             self.initiated = False
         else:
-            self.overlay(image_to_classify, self.output)
+            self.overlay(copy_image, self.output)
 
-        return image_to_classify
+        return copy_image
 
     def getResult(self):
         # Get the result from the NCS
@@ -348,6 +349,7 @@ def main():
         end_time = start_time
 
         ToNext = False
+        Detector.initiate(Q.get())
         while(True):
 
             for i in range(0,buffsize):
@@ -358,7 +360,7 @@ def main():
                     end_time = time.time()
                     ToNext = True
                     break
-                if i == 0: Detector.initiate(display_image[i])
+            #    if i == 0: Detector.initiate(display_image[i])
             if ToNext:break
 
             # check if the window is visible, this means the user hasn't closed
@@ -370,8 +372,9 @@ def main():
                 break
 
             for i in range(0, buffsize):
-                if i >= 0: Detector.finish(display_image[i])
-                raw_key = draw_img(display_image[i])
+                if i >= 0: image_overlapped = Detector.finish(display_image[i])
+                if i == 0: Detector.initiate(display_image[i])
+                raw_key = draw_img(image_overlapped)
                 if (raw_key != -1):
                     if (handle_keys(raw_key) == False):
                         end_time = time.time()
