@@ -320,7 +320,7 @@ def main():
     # get list of all the .mp4 files in the image directory
     input_video_filename_list = os.listdir(input_video_path)
     input_video_filename_list = [i for i in input_video_filename_list if i.endswith('.mp4')]
-    input_video_filename_list = ["police_car_6095_shortened_960x540.mp4"]
+#    input_video_filename_list = ["police_car_6095_shortened_960x540.mp4"]
 
     if (len(input_video_filename_list) < 1):
         # no images to show
