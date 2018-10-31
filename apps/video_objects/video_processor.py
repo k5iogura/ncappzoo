@@ -74,8 +74,8 @@ class video_processor:
 
     # stop reading from video device and placing images in the output queue
     def stop_processing(self):
-        self._worker_thread.join()
         self._end_flag = True
+        self._worker_thread.join()
 
     def pause(self):
         self._pause_mode = True
