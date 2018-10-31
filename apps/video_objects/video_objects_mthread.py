@@ -374,14 +374,22 @@ def main():
 #                break
 
             for i in range(0, buffsize):
-                if not vp.finished() or Q.qsize() > 0:
+                if  Q.qsize() > 0:
                     display_image[i] = Q.get()
+                elif not vp.finished() :
+                    time.sleep(0.1)
+                    try:
+                        display_image[i] = Q.get_nowait()
+                    except queue.Empty:
+                        end_time = time.time()
+                        ToNext = True
                 else:
                     vp.cleanup()
                     end_time = time.time()
                     ToNext = True
                     break
                 if i >= 0: image_overlapped = Detector.finish(display_image[i])
+                if ToNext: break
                 if i == 0: Detector.initiate(display_image[i])
                 raw_key = draw_img(image_overlapped)
                 if (raw_key != -1):
