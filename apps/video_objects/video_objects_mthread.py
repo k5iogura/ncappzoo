@@ -221,14 +221,17 @@ class detector:
         # Send the image to the NCS as 16 bit floats
         self.ssd_mobilenet_graph.LoadTensor(resized_image.astype(numpy.float16), None)
 
-    def finish(self, image_source):
-        copy_image = image_source.copy()
+    def finish(self, image_source=None):
+        copy_image = None
         if self.initiated:
             output, userobj = self.ssd_mobilenet_graph.GetResult()
-            self.overlay(copy_image, output)
+            if image_source is not None:
+                copy_image = image_source.copy()
+                self.overlay(copy_image, output)
             self.output = output
             self.initiated = False
-        else:
+        elif image_source is not None:
+            copy_image = image_source.copy()
             self.overlay(copy_image, self.output)
 
         return copy_image
@@ -353,37 +356,26 @@ def main():
         Detector.initiate(Q.get())
         while(True):
 
-#            for i in range(0,buffsize):
-#                if not vp.finished() or Q.qsize() > 0:
-#                    display_image[i] = Q.get()
-#                else:
-#                    vp.cleanup()
-#                    end_time = time.time()
-#                    ToNext = True
-#                    break
-            #    if i == 0: Detector.initiate(display_image[i])
-#            if ToNext:break
-
-            # check if the window is visible, this means the user hasn't closed
-            # the window via the X button
-#            prop_val = cv2.getWindowProperty(cv_window_name, cv2.WND_PROP_ASPECT_RATIO)
-#            if (prop_val < 0.0):
-#                print("X button")
-#                end_time = time.time()
-#                exit_app = True
-#                break
-
             for i in range(0, buffsize):
                 if  Q.qsize() > 0:
-                    display_image[i] = Q.get()
-                elif not vp.finished() :
-                    time.sleep(0.1)
                     try:
                         display_image[i] = Q.get_nowait()
-                    except queue.Empty:
+                    except:
+                        print("Fatal: Queue is not reponse", Q.qsize())
+                        Detector.finish()
+                        end_time = time.time()
+                        ToNext = True
+                elif not vp.finished() :
+                    time.sleep(1.0)
+                    try:
+                        display_image[i] = Q.get_nowait()
+                    except:
+                        print("Error: Queue is not reponse", Q.qsize())
+                        Detector.finish()
                         end_time = time.time()
                         ToNext = True
                 else:
+                    print("stop and cleanup video processor", Q.qsize())
                     vp.cleanup()
                     end_time = time.time()
                     ToNext = True
