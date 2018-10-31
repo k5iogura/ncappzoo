@@ -69,13 +69,13 @@ class video_processor:
 
     # start reading from the video and placing images in the output queue
     def start_processing(self):
-        self._end_flag = False
         self._worker_thread.start()
+        self._end_flag = False
 
     # stop reading from video device and placing images in the output queue
     def stop_processing(self):
-        self._end_flag = True
         self._worker_thread.join()
+        self._end_flag = True
 
     def pause(self):
         self._pause_mode = True
@@ -109,6 +109,7 @@ class video_processor:
                 # trying the next image from the video.
                 time.sleep(self._queue_full_sleep_seconds)
 
+        self._end_flag = True
         print('exiting video_processor worker thread')
 
     def finished(self):
