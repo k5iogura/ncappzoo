@@ -114,3 +114,11 @@ Frames per Second: 7.2
 // asynchronous prediction
 Frames per Second: 18.7  
 ```
+
+***Notice Exception***  
+Prevent occurrence of exception about all api call in spite of device open or close.  
+In many stuation type of exception is "(mvncStatus.ERROR: -2,)", but I can not know reason of exception from this message.  
+
+Always should use try and except mechanism of python at calling NCS api if not so, you will amaze a long time.  
+
+
