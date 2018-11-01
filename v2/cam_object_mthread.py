@@ -227,14 +227,14 @@ class detector:
         self.ssd_mobilenet_graph.queue_inference_with_fifo_elem(
             self.input_fifo,
             self.output_fifo,
-            resized_image.astype(numpy.float16),
-            'user_object'
+            resized_image.astype(numpy.float32),
+            resized_image
         )
 
     def finish(self, image_source=None):
         copy_image = None
         if self.initiated:
-            output, userobj = self.ssd_mobilenet_graph.GetResult()
+            output, _ = self.output_fifo.read_elem()
             if image_source is not None:
                 copy_image = image_source.copy()
                 self.overlay(copy_image, output)
@@ -248,7 +248,7 @@ class detector:
 
     def getResult(self):
         # Get the result from the NCS
-        output, userobj = self.output_fifo.read_elem()
+        output, _ = self.output_fifo.read_elem()
         #  output
         #   a.	First fp16 value holds the number of valid detections = num_valid.
         #   b.	The next 6 values are unused.
@@ -333,14 +333,14 @@ def main():
     Detector = detector()
 
     # get list of all the .mp4 files in the image directory
-    input_video_filename_list = os.listdir(input_video_path)
-    input_video_filename_list = [i for i in input_video_filename_list if i.endswith('.mp4')]
+#    input_video_filename_list = os.listdir(input_video_path)
+#    input_video_filename_list = [i for i in input_video_filename_list if i.endswith('.mp4')]
 #    input_video_filename_list = ["police_car_6095_shortened_960x540.mp4"]
 
-    if (len(input_video_filename_list) < 1):
-        # no images to show
-        print('No video (.mp4) files found')
-        return 1
+#    if (len(input_video_filename_list) < 1):
+#        # no images to show
+#        print('No video (.mp4) files found')
+#        return 1
 
     cv2.namedWindow(cv_window_name)
     cv2.moveWindow(cv_window_name, 10,  10)
@@ -349,7 +349,7 @@ def main():
     restart  = True
     buffsize = 3
     display_image=[None for i in range(0,buffsize)]
-    for (file_no, input_video_file) in enumerate(input_video_filename_list):
+    for jj in range(0,2):
         cam = cv2.VideoCapture(0)
         frame_count = 0
         end_time = start_time = time.time()
