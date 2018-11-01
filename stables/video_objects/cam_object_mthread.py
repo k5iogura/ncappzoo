@@ -221,14 +221,17 @@ class detector:
         # Send the image to the NCS as 16 bit floats
         self.ssd_mobilenet_graph.LoadTensor(resized_image.astype(numpy.float16), None)
 
-    def finish(self, image_source):
-        copy_image = image_source.copy()
+    def finish(self, image_source=None):
+        copy_image = None
         if self.initiated:
             output, userobj = self.ssd_mobilenet_graph.GetResult()
-            self.overlay(copy_image, output)
+            if image_source is not None:
+                copy_image = image_source.copy()
+                self.overlay(copy_image, output)
             self.output = output
             self.initiated = False
-        else:
+        elif image_source is not None:
+            copy_image = image_source.copy()
             self.overlay(copy_image, self.output)
 
         return copy_image
@@ -348,7 +351,9 @@ def main():
                     if i == 0: Detector.initiate(display_image[i])
                     raw_key = draw_img(image_overlapped)
                     if (raw_key != -1):
+                        print(raw_key)
                         if (handle_keys(raw_key) == False):
+                            Detector.finish(None)
                             end_time = time.time()
                             exit_app = True
                             break
@@ -359,17 +364,20 @@ def main():
                     break
             if exit_app:
                 break
+        if exit_app:
+            break
         if restart:
             try:
                 Detector.close()
                 time.sleep(1.0)
                 Detector = detector()
                 Detector.initiate(display_image[0])
+                cam.release()
             except Exception as e:
                 print("NCS: Restart not work-01",e.args)
                 restart = False
             if not restart:
-                print("NCS: Restart not work-02",e.args)
+                print("NCS: Restart not work-02")
                 break
             else:
                 print("NCS: Restarted OK")
@@ -377,11 +385,13 @@ def main():
         print('Frames per Second: ' + str(frames_per_second))
 
     # Clean up the graph and the device
-    ssd_mobilenet_graph.DeallocateGraph()
-    device.CloseDevice()
-
-    cv2.destroyAllWindows()
-
+    try:
+        Detector.close()
+        cv2.destroyAllWindows()
+    except Exception as e:
+        print("all finalizeing faild",e.args)
+        sys.exit(1)
+    print("finalizing OK")
 
 # main entry point for program. we'll call main() to do what needs to be done.
 if __name__ == "__main__":
