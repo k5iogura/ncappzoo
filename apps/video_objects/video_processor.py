@@ -92,6 +92,7 @@ class video_processor:
             print('video_processor _video_device is None, returning.')
             return
 
+        count = 0
         while (not self._end_flag):
             try:
                 while (self._pause_mode):
@@ -104,6 +105,10 @@ class video_processor:
                     break
                 self._output_queue.put(input_image, True, self._queue_put_wait_max)
             except queue.Full:
+                count = count + 1
+                if count > 100:
+                    print("VideoProcessor Thread break",count)
+                    break
                 # the video device is probably way faster than the processing
                 # so if our output queue is full sleep a little while before
                 # trying the next image from the video.
