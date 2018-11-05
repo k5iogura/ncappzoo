@@ -33,6 +33,7 @@ class video_processor:
         self._request_video_width = request_video_width
         self._request_video_height = request_video_height
         self._pause_mode = False
+        self._finished = False
 
         # create the video device
         self._video_device = cv2.VideoCapture(self._video_file)
@@ -69,8 +70,8 @@ class video_processor:
 
     # start reading from the video and placing images in the output queue
     def start_processing(self):
-        self._worker_thread.start()
         self._end_flag = False
+        self._worker_thread.start()
 
     # stop reading from video device and placing images in the output queue
     def stop_processing(self):
@@ -92,7 +93,6 @@ class video_processor:
             print('video_processor _video_device is None, returning.')
             return
 
-        count = 0
         while (not self._end_flag):
             try:
                 while (self._pause_mode):
@@ -105,23 +105,17 @@ class video_processor:
                     break
                 self._output_queue.put(input_image, True, self._queue_put_wait_max)
             except queue.Full:
-                count = count + 1
-                if count > 100:
-                    print("VideoProcessor Thread break",count)
-                    break
                 # the video device is probably way faster than the processing
                 # so if our output queue is full sleep a little while before
                 # trying the next image from the video.
                 time.sleep(self._queue_full_sleep_seconds)
 
-        self._end_flag = True
+        self._finished = True
         print('exiting video_processor worker thread')
 
     def finished(self):
-        return self._end_flag
+        return self._finished
     # should be called once for each class instance when finished with it.
     def cleanup(self):
         # close video device
-        self.stop_processing()
         self._video_device.release()
-

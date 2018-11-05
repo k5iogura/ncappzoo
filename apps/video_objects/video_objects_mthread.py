@@ -221,17 +221,14 @@ class detector:
         # Send the image to the NCS as 16 bit floats
         self.ssd_mobilenet_graph.LoadTensor(resized_image.astype(numpy.float16), None)
 
-    def finish(self, image_source=None):
-        copy_image = None
+    def finish(self, image_source):
+        copy_image = image_source.copy()
         if self.initiated:
             output, userobj = self.ssd_mobilenet_graph.GetResult()
-            if image_source is not None:
-                copy_image = image_source.copy()
-                self.overlay(copy_image, output)
+            self.overlay(copy_image, output)
             self.output = output
             self.initiated = False
-        elif image_source is not None:
-            copy_image = image_source.copy()
+        else:
             self.overlay(copy_image, self.output)
 
         return copy_image
@@ -334,13 +331,13 @@ def main():
     cv2.moveWindow(cv_window_name, 10,  10)
 
     exit_app = False
-    buffsize = 3
+    buffsize = 6
     display_image=[None for i in range(0,buffsize)]
-    Q = queue.Queue(128)
     for (file_no, input_video_file) in enumerate(input_video_filename_list):
         if len(input_video_filename_list) == file_no+1:exit_app = True
         print("video = %d/%d"%(file_no, len(input_video_filename_list)))
 
+        Q = queue.Queue(128)
         vp = video_processor.video_processor(Q, input_video_file)
         vp.start_processing()
         actual_frame_width  = vp.get_actual_video_width()
@@ -349,39 +346,37 @@ def main():
         print ('actual video resolution: ' + str(actual_frame_width) + ' x ' + str(actual_frame_height))
 
         frame_count = 0
-        start_time = time.time()
-        end_time = start_time
+        end_time = start_time = time.time()
 
         ToNext = False
-        Detector.initiate(Q.get())
+        for i in range(0,33):
+            if Q.qsize()>0:
+                Detector.initiate(Q.get())
+                ToNext = True
+                break
+            else:
+                time.sleep(0.1)
+        if ToNext == False:
+            Detector.close()
+            print("Main Thread Exiting : VideoProcessor no response")
+            sys.exit(1)
+        ToNext = False
+
         while(True):
 
-            for i in range(0, buffsize):
-                if  Q.qsize() > 0:
-                    try:
-                        display_image[i] = Q.get_nowait()
-                    except:
-                        print("Fatal: Queue is not reponse", Q.qsize())
-                        Detector.finish()
-                        end_time = time.time()
-                        ToNext = True
-                elif not vp.finished() :
-                    time.sleep(1.0)
-                    try:
-                        display_image[i] = Q.get_nowait()
-                    except:
-                        print("Error: Queue is not reponse", Q.qsize())
-                        Detector.finish()
-                        end_time = time.time()
-                        ToNext = True
+            buffsize_avail = 0
+            for i in range(0,buffsize):
+                if not vp.finished() or Q.qsize() > 0:
+                    display_image[i] = Q.get()
+                    buffsize_avail = buffsize_avail + 1
                 else:
-                    print("stop and cleanup video processor", Q.qsize())
                     vp.cleanup()
                     end_time = time.time()
                     ToNext = True
                     break
+
+            for i in range(0, buffsize_avail):
                 if i >= 0: image_overlapped = Detector.finish(display_image[i])
-                if ToNext: break
                 if i == 0: Detector.initiate(display_image[i])
                 raw_key = draw_img(image_overlapped)
                 if (raw_key != -1):
@@ -391,6 +386,10 @@ def main():
                         break
                 frame_count += 1
             if ToNext:break
+            if vp.finished() and Q.qsize() == 0:
+                end_time = time.time()
+                exit_app = True
+                break
 
         frames_per_second = frame_count / (end_time - start_time)
         print('Frames per Second: ' + str(frames_per_second))

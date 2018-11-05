@@ -198,7 +198,7 @@ def run_through(image_source, ssd_mobilenet_graph, image_stack, result_queue):
             start = time.time()
             output = run_inference(Image_source, ssd_mobilenet_graph, result_queue)
             result_queue.put(output)
-            print("%.6f FPS %d objects"%((1.0/(time.time()-start)), output[0]))
+            #print("%.6f FPS %d objects"%((1.0/(time.time()-start)), output[0]))
         if system_stop:
             print("stopping run_through..")
             break
