@@ -1,5 +1,6 @@
 # Neural Compute Application Zoo (NC App Zoo)
-**Notice: To use SSD_Mobilenet .caffemodel and prototxt see ./stable/caffe directory**
+**Notice: To use SSD_MobileNet .caffemodel and .prototxt only see ./stables/SSD_MobileNet/ directory**  
+
 Welcome to the Intel® Movidius™ Neural Compute App Zoo (NC App Zoo). This repository is a place for any interested developers to share their projects (code and Neural Network content) that make use of the Intel® Movidius™ Neural Compute Stick (Intel® Movidius™ NCS) and associated [Intel® Movidius™ Neural Compute Software Development Kit](http://www.github.com/movidius/ncsdk).
  
 The NC App Zoo is a community repository with many content owners and maintainers. All NC App Zoo content is being made available here in a central location for others to download, experiment with, modify, build upon, and learn from.
